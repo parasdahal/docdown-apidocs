@@ -69,7 +69,7 @@ curl "https://api.docdown.io/v1/trigger/WORKFLOW_ID" \
 `POST https://api.docdown.io/v1/trigger/WORKFLOW_ID`
 
 <aside class="notice">
-Replace the endpoint with the endpoint from incoming webhook step.
+Replace <code>WORKFLOW_ID</code> with the workflow ID from Incoming Webhook step.
 </aside>
 
 # Resource
@@ -99,7 +99,7 @@ curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
 | mode      | "base64" | If set to "blob", the result will be in binary format, else in base64 encoded string. |
 
 <aside class="notice">
-Replace the <code>WORKFLOW_ID</code> from the endpoint URL given in the Incoming Webhook step of the  Workflow Editor.
+Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
 </aside>
 
 ## Get the output data of the workflow execution
@@ -123,5 +123,5 @@ curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
 `GET https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID`
 
 <aside class="notice">
-Replace the <code>WORKFLOW_ID</code> from the endpoint URL given in the Incoming Webhook step of the  Workflow Editor.
+Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
 </aside>
