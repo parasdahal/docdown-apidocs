@@ -1,241 +1,127 @@
 ---
-title: API Reference
-
-language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
-  - javascript
-
-toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
+title: Docdown API Reference
 
 includes:
   - errors
-
-search: true
 
 code_clipboard: true
 ---
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the <a href="https://docdown.io">Docdown API</a>.
 
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+Docdown automates your document workflows.
 
-This example API documentation page was created with [Slate](https://github.com/slatedocs/slate). Feel free to edit it and use it as a base for your own API's documentation.
+1. Upload your PDF documents and define the fillable areas.
+2. Setup your custom workflow with visual Workflow Builder.
+3. Use online forms or this API to trigger your workflow and generate your document.
 
 # Authentication
 
-> To authorize, use this code:
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
+> To authorize your requests:
 
 ```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here" \
-  -H "Authorization: meowmeowmeow"
+curl "https://api.docdown.io/v1/" \
+  -H "Authorization: bearer API_KEY"
 ```
 
-```javascript
-const kittn = require('kittn');
+> Make sure to replace `API_KEY` with your API key.
 
-let api = kittn.authorize('meowmeowmeow');
-```
+Docdown uses API keys to allow access to the API. You can get your API key <a href="https://app.docdown.io/login?redirect=/settings/account" target="_blank">here</a>.
 
-> Make sure to replace `meowmeowmeow` with your API key.
+Docdown expects the API key to be included in all API requests to the server in a header that looks like the following:
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`Authorization: bearer API_KEY`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+Replace <code>API_KEY</code> with your personal API key.
 </aside>
 
-# Kittens
+# Incoming Webhook Trigger
 
-## Get All Kittens
+Add an `Incoming Webhook` trigger step in your workflow from the Workflow Editor and select the document to be used in this workflow. The webhook endpoint and request schema is then provided to be used to trigger this workflow.
 
-```ruby
-require 'kittn'
+<!-- ![Defining Incoming Webhoooks](/images/incoming-webhooks.jpg) -->
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
+## Trigger a workflow
 
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+> To trigger the workflow:
 
 ```shell
-curl "http://example.com/api/kittens" \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+curl "https://api.docdown.io/v1/trigger/WORKFLOW_ID" \
+  -H "Authorization: bearer API_KEY" \
+  -H "Content-Type: application/json" \
+  -d json
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
+{
+  "workflowRunId": "5196de15-b03d-4687-bc7a-570b53890534",
+  "resourceUrl": "https://api.docdown.io/v1/resource/file/5196de15-b03d-4687-bc7a-570b53890534?mode=blob"
+}
 ```
-
-This endpoint retrieves all kittens.
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`POST https://api.docdown.io/v1/trigger/WORKFLOW_ID`
+
+<aside class="notice">
+Replace the endpoint with the endpoint from incoming webhook step.
+</aside>
+
+# Resource
+
+`Resource` is the output of your workflow execution. Both the generated files and output data
+of each workflow execution can be requested.
+
+## Get the generated PDF of specific workflow execution
+
+> To trigger the workflow:
+
+```shell
+curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
+  -H "Authorization: bearer API_KEY"
+```
+
+> The above command returns either binary PDF file or base64 encoded string.
+
+### HTTP Request
+
+`GET https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID`
 
 ### Query Parameters
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+| Parameter | Default  | Description                                                                           |
+| --------- | -------- | ------------------------------------------------------------------------------------- |
+| mode      | "base64" | If set to "blob", the result will be in binary format, else in base64 encoded string. |
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
+<aside class="notice">
+Replace the <code>WORKFLOW_ID</code> from the endpoint URL given in the Incoming Webhook step of the  Workflow Editor.
 </aside>
 
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
+## Get the output data of the workflow execution
 
 ```shell
-curl "http://example.com/api/kittens/2" \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
+  -H "Authorization: bearer API_KEY"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+  "field_1": "field1_value",
+  "field_2": "field2_value"
 }
 ```
 
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
-
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`GET https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID`
 
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
-
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2" \
-  -X DELETE \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
-```
-
-This endpoint deletes a specific kitten.
-
-### HTTP Request
-
-`DELETE http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
-
+<aside class="notice">
+Replace the <code>WORKFLOW_ID</code> from the endpoint URL given in the Incoming Webhook step of the  Workflow Editor.
+</aside>
