@@ -105,7 +105,7 @@ Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from th
 ## Get the output data of the workflow execution
 
 ```shell
-curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
+curl "https://api.docdown.io/v1/resource/data/WORKFLOW_RUN_ID" \
   -H "Authorization: bearer API_KEY"
 ```
 
@@ -120,7 +120,7 @@ curl "https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID" \
 
 ### HTTP Request
 
-`GET https://api.docdown.io/v1/resource/file/WORKFLOW_RUN_ID`
+`GET https://api.docdown.io/v1/resource/data/WORKFLOW_RUN_ID`
 
 <aside class="notice">
 Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
