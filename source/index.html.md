@@ -11,7 +11,7 @@ code_clipboard: true
 
 Welcome to the <a href="https://docdown.io">Docdown API</a>.
 
-Docdown automates your document workflows.
+Docdown automates your document generation workflows.
 
 1. Upload your PDF documents and define the fillable areas.
 2. Setup your custom workflow with visual Workflow Builder.
