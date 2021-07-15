@@ -6,11 +6,9 @@ The Docdown API uses the following error codes:
 | ---------- | ----------------------------------------------------------------------------------------- |
 | 400        | Bad Request -- Your request is invalid or validation failed.                              |
 | 401        | Unauthorized -- Your API key is incorrect.                                                |
-|            |
+| 403        | Forbidden -- Your access leve is inadequate or usage quota is over limit.                 |
 | 404        | Not Found -- The specified item could not be found.                                       |
-|            |
-| 406        | Not Acceptable -- You requested a format that isn't acceptable.                           |  |
-| 426        | Upgrade Required -- Your subscription is invalid or usage is over limit.                  |
+| 406        | Not Acceptable -- You requested a format that isn't acceptable.                           |
 | 429        | Too Many Requests -- Slow down!                                                           |
 | 500        | Internal Server Error -- We had a problem with our server. Try again later.               |
 | 503        | Service Unavailable -- We're temporarily offline for maintenance. Please try again later. |

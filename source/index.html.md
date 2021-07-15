@@ -3,8 +3,7 @@ title: Docdown API Reference
 
 includes:
   - errors
-
-code_clipboard: true
+search: true
 ---
 
 # Introduction
@@ -13,17 +12,27 @@ Welcome to the <a href="https://docdown.io">Docdown API</a>.
 
 Docdown automates your document generation workflows.
 
-1. Upload your PDF documents and define the fillable areas.
-2. Setup your custom workflow with visual Workflow Builder.
-3. Use online forms or this API to trigger your workflow and generate your document.
+1. Upload your PDF documents and define the template fields.
+2. Setup your custom automations with visual Workflow Builder.
+3. Use web forms, integrations, or this REST API to trigger your workflow and generate your document.
 
 # Authentication
 
-> To authorize your requests:
+> To verify your authentication:
 
 ```shell
-curl "https://api.docdown.io/v1/" \
+curl "https://api.docdown.io/v1/auth" \
   -H "Authorization: bearer API_KEY"
+```
+
+> The above endpoint returns JSON structured like this:
+
+```json
+{
+  "id": "5196dq15-b03d-4687-bd7x-570b53890534",
+  "name": "My Name",
+  "email": "my@email.com"
+}
 ```
 
 > Make sure to replace `API_KEY` with your API key.
@@ -42,30 +51,9 @@ Replace <code>API_KEY</code> with your personal API key.
 
 `GET https://api.docdown.io/v1/auth`
 
-> To verify your identity:
-
-```shell
-curl "https://api.docdown.io/v1/auth" \
-  -H "Authorization: bearer API_KEY"
-```
-
-> The above endpoint returns JSON structured like this:
-
-```json
-{
-  "id": "5196dq15-b03d-4687-bd7x-570b53890534",
-  "name": "My Name",
-  "email": "my@email.com"
-}
-```
-
 # Documents
 
-You can request an array of all the documents you have setup in your account. The endpoint responds with `Document` objects, which includes `id`, `name` and `fields` attributes.
-
-The `fields` attribute is a list of fields you have setup in the document, each with the object structure `{"name":"Field", "type":"string"}`. The `type` attribute can have the following values: `string`, `number`, `boolean` and `image/png` (base64 encoded PNG image).
-
-> To get an array of documents:
+> To get all documents in your Docdown account:
 
 ```shell
 curl "https://api.docdown.io/v1/documents" \
@@ -77,37 +65,88 @@ curl "https://api.docdown.io/v1/documents" \
 ```json
 [
   {
-    "id": "ad97a8ed-1aa3-40fc-96ee-ae68c71eceb9",
-    "name": "fw9.pdf",
+    "id": "2118cff9-dd53-4355-b103-c4ba30dd08fe",
+    "name": "certificate.pdf",
     "fields": [
       {
-        "name": "field1",
-        "type": "string"
+        "key": "photo",
+        "label": "Photo",
+        "required": false,
+        "type": "string",
+        "helpText": "Image URL."
       },
       {
-        "name": "field2",
-        "type": "boolean"
+        "key": "certify",
+        "label": "Certify",
+        "type": "boolean",
+        "required": false,
+        "helpText": "True or non-empty value marks the field as checked."
       },
       {
-        "name": "field3",
-        "type": "number"
+        "key": "full_name",
+        "label": "Full Name",
+        "type": "string",
+        "required": false,
+        "helpText": "Text field that expects text data."
       },
       {
-        "name": "field4",
-        "type": "image/png"
+        "key": "date_of_signature_dd_mm_yyyy",
+        "label": "Date of Signature (DDMMYYYY)",
+        "type": "string",
+        "required": false,
+        "helpText": "Text field that expects text data."
+      },
+      {
+        "key": "signature",
+        "label": "Signature",
+        "children": [
+          {
+            "key": "signerName",
+            "type": "string",
+            "required": true,
+            "helpText": "Full legal name of the signer."
+          },
+          {
+            "key": "signerEmail",
+            "type": "string",
+            "required": true,
+            "helpText": "Email address of the signer. Signer will receive completed document and audit trail at this address after completion."
+          },
+          {
+            "key": "signature",
+            "type": "string",
+            "helpText": "Signature image URL.",
+            "required": true
+          }
+        ]
       }
     ]
   }
 ]
 ```
 
+> To get a single document:
+
+```shell
+curl "https://api.docdown.io/v1/documents/get/<DOCUMENT_ID>" \
+  -H "Authorization: bearer API_KEY"
+```
+
+You can request an array of all the documents you have setup in your account. The endpoint responds with `Document` objects, which includes `id`, `name` and `fields` attributes.
+
+The `fields` attribute is a list of field schema for all the fields you have setup in the document. Each schema object represents what the API expects when sending data to the API.
+
 ### HTTP Request
 
 `GET https://api.docdown.io/v1/documents`
 
-# Workflows
+### Parameters
 
-You can request an array of all the workflows you have setup in your account. The endpoint responds with `Workflow` objects, which includes `id`, `name`, `active` and `steps` attributes.
+| Parameter   | Description            |
+| ----------- | ---------------------- |
+| DOCUMENT_ID | The id of the document |
+
+# Workflows
 
 > To get an array of workflows:
 
@@ -121,18 +160,18 @@ curl "https://api.docdown.io/v1/workflows" \
 ```json
 [
   {
-    "id": "bad7de6f-2d5f-485b-97cc-1bb69bf01955",
-    "name": "Google Form Workflow",
+    "id": "2325667e-96d0-4063-863b-8a813aeef812",
+    "name": "Generate certificate from Zapier",
     "active": true,
     "steps": [
       {
-        "id": "dbf31408-f296-49b1-81db-2ce79ca74ef5",
+        "id": "8b1dea48-5370-45ca-aaed-abd3ef2ccea0",
         "name": "Incoming Webhook",
         "type": "incomingWebhook",
         "order": 1
       },
       {
-        "id": "b5c519af-7c82-4231-b91e-9b8c5716d0fe",
+        "id": "58a36313-17a2-457b-ac4c-e2a3e73f57b5",
         "name": "Email",
         "type": "email",
         "order": 2
@@ -142,9 +181,114 @@ curl "https://api.docdown.io/v1/workflows" \
 ]
 ```
 
+You can request an array of all the workflows you have setup in your account. The endpoint responds with `Workflow` objects, which includes `id`, `name`, `active` and `steps` attributes.
+
 ### HTTP Request
 
 `GET https://api.docdown.io/v1/workflows`
+
+# Executing a Workflow
+
+To execute a workflow, send a POST request to `https://api.docdown.io/v1/trigger/<WORKFLOW_ID>` with the field data in the request body.
+
+> To trigger the workflow:
+
+```shell
+curl "https://api.docdown.io/v1/trigger/<WORKFLOW_ID>" \
+  -H "Authorization: bearer API_KEY" \
+  -H "Content-Type: application/json" \
+  -d \"{
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Joe_Biden_presidential_portrait.jpg/480px-Joe_Biden_presidential_portrait.jpg",
+    "certify": true,
+    "full_name": "Joe Biden",
+    "date_of_signature_dd_mm_yyyy": "01012021",
+    "signature":{
+        "signerName": "Joe Biden",
+        "signerEmail": "potus@us.gov",
+        "signature": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Joe_Biden_Signature.svg/176px-Joe_Biden_Signature.svg.png"
+    }\"
+  }
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "workflowRunId": "5196de15-b03d-4687-bc7a-570b53890534",
+  "resourceUrl": "https://api.docdown.io/v1/resource/file/5196de15-b03d-4687-bc7a-570b53890534?mode=blob"
+}
+```
+
+### HTTP Request
+
+`POST https://api.docdown.io/v1/trigger/<WORKFLOW_ID>`
+
+### Parameters
+
+| Parameter   | Description            |
+| ----------- | ---------------------- |
+| WORKFLOW_ID | The id of the worklfow |
+
+## Get the generated PDF file from workflow execution
+
+> To trigger the workflow:
+
+```shell
+curl "https://api.docdown.io/v1/resource/file/<WORKFLOW_RUN_ID>" \
+  -H "Authorization: bearer API_KEY"
+```
+
+> The above command returns either binary PDF file or base64 encoded string.
+
+### HTTP Request
+
+`GET https://api.docdown.io/v1/resource/file/<WORKFLOW_RUN_ID>`
+
+### Parameters
+
+| Parameter       | Description                      |
+| --------------- | -------------------------------- |
+| WORKFLOW_RUN_ID | The id of the worklfow execution |
+
+### Query Parameters
+
+| Parameter | Default  | Description                                                                           |
+| --------- | -------- | ------------------------------------------------------------------------------------- |
+| mode      | "base64" | If set to "blob", the result will be in binary format, else in base64 encoded string. |
+
+<aside class="notice">
+Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
+</aside>
+
+## Get the data of the workflow execution
+
+```shell
+curl "https://api.docdown.io/v1/resource/data/<WORKFLOW_RUN_ID>" \
+  -H "Authorization: bearer API_KEY"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "field_1": "field1_value",
+  "field_2": "field2_value"
+}
+```
+
+### HTTP Request
+
+`GET https://api.docdown.io/v1/resource/data/<WORKFLOW_RUN_ID>`
+
+### Parameters
+
+| Parameter       | Description                      |
+| --------------- | -------------------------------- |
+| WORKFLOW_RUN_ID | The id of the worklfow execution |
+
+<aside class="notice">
+Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
+</aside>
 
 # Workflow History
 
@@ -182,105 +326,3 @@ curl "https://api.docdown.io/v1/workflows/completed/<WORFKLOW_ID>" \
 | Parameter   | Description            |
 | ----------- | ---------------------- |
 | WORKFLOW_ID | The id of the worklfow |
-
-# Incoming Webhook Trigger
-
-Add an `Incoming Webhook` trigger step in your workflow from the Workflow Editor and select the document to be used in this workflow. The webhook endpoint and request schema is then provided to be used to trigger this workflow.
-
-<!-- ![Defining Incoming Webhoooks](/images/incoming-webhooks.jpg) -->
-
-## Trigger a workflow
-
-> To trigger the workflow:
-
-```shell
-curl "https://api.docdown.io/v1/trigger/<WORKFLOW_ID>" \
-  -H "Authorization: bearer API_KEY" \
-  -H "Content-Type: application/json" \
-  -d json
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "workflowRunId": "5196de15-b03d-4687-bc7a-570b53890534",
-  "resourceUrl": "https://api.docdown.io/v1/resource/file/5196de15-b03d-4687-bc7a-570b53890534?mode=blob"
-}
-```
-
-### HTTP Request
-
-`POST https://api.docdown.io/v1/trigger/<WORKFLOW_ID>`
-
-### Parameters
-
-| Parameter   | Description            |
-| ----------- | ---------------------- |
-| WORKFLOW_ID | The id of the worklfow |
-
-# Resource
-
-`Resource` is the output of your workflow execution. Both the generated files and output data
-of each workflow execution can be requested.
-
-## Get the generated PDF of specific workflow execution
-
-> To trigger the workflow:
-
-```shell
-curl "https://api.docdown.io/v1/resource/file/<WORKFLOW_RUN_ID>" \
-  -H "Authorization: bearer API_KEY"
-```
-
-> The above command returns either binary PDF file or base64 encoded string.
-
-### HTTP Request
-
-`GET https://api.docdown.io/v1/resource/file/<WORKFLOW_RUN_ID>`
-
-### Parameters
-
-| Parameter       | Description                      |
-| --------------- | -------------------------------- |
-| WORKFLOW_RUN_ID | The id of the worklfow execution |
-
-### Query Parameters
-
-| Parameter | Default  | Description                                                                           |
-| --------- | -------- | ------------------------------------------------------------------------------------- |
-| mode      | "base64" | If set to "blob", the result will be in binary format, else in base64 encoded string. |
-
-<aside class="notice">
-Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
-</aside>
-
-## Get the output data of the workflow execution
-
-```shell
-curl "https://api.docdown.io/v1/resource/data/<WORKFLOW_RUN_ID>" \
-  -H "Authorization: bearer API_KEY"
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "field_1": "field1_value",
-  "field_2": "field2_value"
-}
-```
-
-### HTTP Request
-
-`GET https://api.docdown.io/v1/resource/data/<WORKFLOW_RUN_ID>`
-
-### Parameters
-
-| Parameter       | Description                      |
-| --------------- | -------------------------------- |
-| WORKFLOW_RUN_ID | The id of the worklfow execution |
-
-<aside class="notice">
-Replace the <code>WORKFLOW_RUN_ID</code> with <code>workflowRunId</code> from the response of <code>/v1/trigger/WORKFLOW_ID</code>.
-</aside>
